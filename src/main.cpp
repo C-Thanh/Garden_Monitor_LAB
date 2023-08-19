@@ -4,6 +4,7 @@
 #include <AccelStepper.h>
 #include <WiFi.h>
 #include "PubSubClient.h"
+#include "ThingSpeak.h"
 
 #define Max_Humidity 80
 #define Min_Humidity 60
@@ -45,6 +46,11 @@ const char* password = "";
 const uint16_t port = 1883;
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+//ThingSpeak setting
+const unsigned long channelId = 2245470;
+const char* writeAPI = "CC4W6GQVHGJDBM4F";
+const char* readAPI = "5HUF2J6V10OP77ZX";
 
 // Creates an instance
 AccelStepper myStepper(motorInterfaceType, stepPin, dirPin);
@@ -198,6 +204,29 @@ void loop() {
   if( myStepper.distanceToGo() != 0 ) {
     myStepper.run();
   }
+
+  int ret = ThingSpeak.writeField(channelId, 1, curData.temperature, writeAPI);
+  if(ret == 200){
+    Serial.println("Successful");
+  }
+  else{
+    Serial.println("Error");
+  }
+  ret = ThingSpeak.writeField(channelId, 2, curData.moiser, writeAPI);
+  if(ret == 200){
+    Serial.println("Successful");
+  }
+  else{
+    Serial.println("Error");
+  }
+  ret = ThingSpeak.writeField(channelId, 3, curData.humidity, writeAPI);
+  if(ret == 200){
+    Serial.println("Successful");
+  }
+  else{
+    Serial.println("Error");
+  }
+  delay(15000);
 }
 
 void mqtt_callback(char* topic, byte* payload, uint32_t len){
